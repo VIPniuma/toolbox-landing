@@ -1,0 +1,327 @@
+.screenshots {
+  background: var(--bg-secondary);
+  position: relative;
+}
+
+.screenshots::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+}
+
+/* 展示区 */
+.screenshots-showcase {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.showcase-main {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.showcase-frame {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+}
+
+/* 模拟窗口 */
+.mockup-window {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.mockup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mockup-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.mockup-title {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.mockup-content {
+  display: flex;
+  min-height: 400px;
+}
+
+.mockup-sidebar {
+  width: 200px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.sidebar-item:hover,
+.sidebar-item.active {
+  background: rgba(168, 85, 247, 0.1);
+  color: var(--neon-purple);
+}
+
+.sidebar-item svg {
+  font-size: 1.1rem;
+}
+
+.mockup-body {
+  flex: 1;
+  padding: 24px;
+}
+
+.mockup-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.mock-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.mock-card:hover {
+  border-color: var(--border-glow);
+}
+
+.mock-card.large {
+  grid-column: span 2;
+}
+
+.mock-card.wide {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mock-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.3rem;
+}
+
+.mock-card-info h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.mock-card-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.mock-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 60px;
+}
+
+.chart-bar {
+  width: 20px;
+  background: linear-gradient(180deg, var(--neon-purple), var(--neon-blue));
+  border-radius: 4px 4px 0 0;
+  opacity: 0.8;
+}
+
+/* 导航按钮 */
+.showcase-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.showcase-nav:hover {
+  border-color: var(--neon-purple);
+  background: rgba(168, 85, 247, 0.1);
+  color: var(--neon-purple);
+}
+
+.showcase-nav.prev {
+  left: -24px;
+}
+
+.showcase-nav.next {
+  right: -24px;
+}
+
+/* 缩略图导航 */
+.showcase-thumbnails {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.thumbnail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  flex: 1;
+  max-width: 280px;
+}
+
+.thumbnail:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+}
+
+.thumbnail.active {
+  border-color: var(--neon-purple);
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.thumbnail-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--gradient-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.thumbnail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.thumbnail-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.thumbnail-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .mockup-content {
+    flex-direction: column;
+  }
+
+  .mockup-sidebar {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .sidebar-item {
+    white-space: nowrap;
+    padding: 8px 12px;
+  }
+
+  .sidebar-item span {
+    display: none;
+  }
+
+  .mockup-body {
+    padding: 16px;
+  }
+
+  .mockup-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mock-card.large,
+  .mock-card.wide {
+    grid-column: span 1;
+  }
+
+  .showcase-nav {
+    display: none;
+  }
+
+  .showcase-thumbnails {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .thumbnail {
+    max-width: 100%;
+    width: 100%;
+  }
+}
