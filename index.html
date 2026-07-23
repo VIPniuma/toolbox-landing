@@ -1,15 +1,1025 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="NexusTool - 下一代玩机工具箱，一站式设备管理与优化" />
-    <meta name="keywords" content="玩机工具箱,设备管理,系统优化,刷机工具,NexusTool" />
-    <title>NexusTool - 下一代玩机工具箱</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>户外装备清单 · Packsheet</title>
+<style>
+  :root{
+    --bg:#f4f1ea;
+    --surface:#ffffff;
+    --surface-2:#faf8f3;
+    --ink:#22272e;
+    --muted:#6b7280;
+    --line:#e7e2d6;
+    --green:#3f5e3f;
+    --green-soft:#eef3ec;
+    --green-deep:#2f4a2f;
+    --accent:#c2691f;
+    --accent-soft:#fbeedd;
+    --danger:#b54838;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(34,39,46,.04), 0 8px 24px rgba(34,39,46,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:120px;
+  }
+  button{font-family:inherit}
+
+  /* ===== Top bar ===== */
+  .topbar{
+    position:sticky;top:0;z-index:30;
+    background:rgba(244,241,234,.92);
+    backdrop-filter:saturate(180%) blur(10px);
+    -webkit-backdrop-filter:saturate(180%) blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:880px;margin:0 auto;padding:14px 18px 12px;
+  }
+  .brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .logo{
+    width:34px;height:34px;border-radius:9px;flex:none;
+    background:linear-gradient(135deg,var(--green) 0%,var(--green-deep) 100%);
+    display:grid;place-items:center;color:#fff;
+    box-shadow:0 2px 6px rgba(47,74,47,.3);
+  }
+  .logo svg{width:20px;height:20px}
+  .brand-text{min-width:0}
+  .brand-title{font-size:16px;font-weight:700;letter-spacing:.3px;line-height:1.1}
+  .brand-sub{font-size:11px;color:var(--muted);letter-spacing:.5px;margin-top:2px}
+
+  .top-actions{display:flex;gap:6px}
+  .icon-btn{
+    border:1px solid var(--line);background:var(--surface);
+    width:36px;height:36px;border-radius:10px;cursor:pointer;
+    display:grid;place-items:center;color:var(--ink);
+    transition:.15s ease;
+  }
+  .icon-btn:hover{background:var(--green-soft);border-color:var(--green);color:var(--green-deep)}
+  .icon-btn svg{width:18px;height:18px}
+
+  /* progress hero */
+  .progress-card{
+    margin-top:12px;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px;box-shadow:var(--shadow);
+  }
+  .progress-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .progress-num{font-size:26px;font-weight:800;color:var(--green-deep);letter-spacing:-.5px}
+  .progress-num small{font-size:14px;font-weight:600;color:var(--muted)}
+  .progress-label{font-size:12px;color:var(--muted);letter-spacing:.3px}
+  .progress-track{
+    margin-top:10px;height:8px;border-radius:99px;
+    background:var(--green-soft);overflow:hidden;position:relative;
+  }
+  .progress-fill{
+    height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--green) 0%,#5a8a4d 100%);
+    width:0%;transition:width .4s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--muted)}
+
+  /* search */
+  .search-wrap{margin-top:12px;position:relative}
+  .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+  .search-input{
+    width:100%;padding:10px 12px 10px 36px;border-radius:10px;
+    border:1px solid var(--line);background:var(--surface);
+    font-size:14px;color:var(--ink);outline:none;transition:.15s;
+  }
+  .search-input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+
+  /* ===== List ===== */
+  .container{max-width:880px;margin:0 auto;padding:16px 18px 0}
+
+  .l1{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);margin-bottom:14px;
+    box-shadow:var(--shadow);overflow:hidden;
+  }
+  .l1-head{
+    display:flex;align-items:center;gap:10px;padding:14px 16px;
+    cursor:pointer;user-select:none;
+    background:linear-gradient(180deg,var(--surface) 0%,var(--surface-2) 100%);
+    border-bottom:1px solid transparent;transition:.15s;
+  }
+  .l1.collapsed .l1-head{border-bottom-color:transparent}
+  .l1:not(.collapsed) .l1-head{border-bottom-color:var(--line)}
+  .chev{width:18px;height:18px;flex:none;color:var(--muted);transition:transform .2s ease}
+  .l1.collapsed .chev{transform:rotate(-90deg)}
+
+  .l1-icon{
+    width:30px;height:30px;border-radius:8px;flex:none;
+    background:var(--green-soft);color:var(--green-deep);
+    display:grid;place-items:center;font-size:15px;
+  }
+  .l1-title{font-size:15px;font-weight:700;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .l1-title-input{
+    font-size:15px;font-weight:700;flex:1;min-width:0;
+    border:1px solid var(--green);border-radius:6px;padding:3px 6px;
+    background:#fff;outline:none;font-family:inherit;
+  }
+  .mini-badge{
+    font-size:11px;font-weight:600;color:var(--muted);
+    background:var(--surface-2);border:1px solid var(--line);
+    padding:2px 8px;border-radius:99px;white-space:nowrap;
+  }
+  .mini-badge.done{background:var(--green-soft);color:var(--green-deep);border-color:transparent}
+  .head-actions{display:flex;gap:4px;align-items:center}
+  .mini-btn{
+    border:none;background:transparent;cursor:pointer;
+    width:26px;height:26px;border-radius:6px;display:grid;place-items:center;
+    color:var(--muted);transition:.12s;
+  }
+  .mini-btn:hover{background:var(--green-soft);color:var(--green-deep)}
+  .mini-btn.danger:hover{background:#fdecea;color:var(--danger)}
+  .mini-btn svg{width:15px;height:15px}
+
+  .l1-body{padding:6px 8px 12px 8px}
+  .l1.collapsed .l1-body{display:none}
+
+  /* L2 */
+  .l2{margin:6px 4px;border-radius:10px;overflow:hidden}
+  .l2-head{
+    display:flex;align-items:center;gap:8px;padding:9px 10px;
+    cursor:pointer;user-select:none;border-radius:10px;transition:.12s;
+  }
+  .l2-head:hover{background:var(--surface-2)}
+  .l2 .chev{width:15px;height:15px}
+  .l2.collapsed .chev{transform:rotate(-90deg)}
+  .l2-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+  .l2-title{font-size:14px;font-weight:600;color:var(--ink);flex:1;min-width:0}
+  .l2-title-input{font-size:14px;font-weight:600;flex:1;border:1px solid var(--green);border-radius:6px;padding:2px 6px;font-family:inherit;outline:none}
+  .l2-body{padding:2px 0 4px 22px}
+  .l2.collapsed .l2-body{display:none}
+
+  /* L3 item */
+  .item{
+    display:flex;align-items:center;gap:10px;padding:9px 8px;
+    border-radius:8px;transition:.12s;position:relative;
+  }
+  .item:hover{background:var(--surface-2)}
+  .checkbox{
+    width:22px;height:22px;border-radius:7px;flex:none;
+    border:2px solid #c8c2b4;cursor:pointer;position:relative;
+    background:#fff;transition:.15s;transition-property:background,border-color,transform;
+  }
+  .checkbox:hover{border-color:var(--green)}
+  .checkbox.checked{background:var(--green);border-color:var(--green);transform:scale(1.04)}
+  .checkbox.checked::after{
+    content:"";position:absolute;left:6px;top:2px;width:6px;height:11px;
+    border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);
+  }
+  .item-name{
+    flex:1;min-width:0;font-size:14px;color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .item-name-input{flex:1;min-width:0;font-size:14px;border:1px solid var(--green);border-radius:6px;padding:3px 6px;font-family:inherit;outline:none}
+  .item.checked .item-name{color:var(--muted);text-decoration:line-through;text-decoration-color:#9ca3af}
+  .item-note{
+    font-size:12px;color:var(--muted);font-style:italic;
+    max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* add buttons */
+  .add-row{
+    display:flex;align-items:center;gap:8px;padding:7px 8px;
+    color:var(--muted);font-size:13px;cursor:pointer;border-radius:8px;transition:.12s;
+  }
+  .add-row:hover{background:var(--green-soft);color:var(--green-deep)}
+  .add-row.l2-add{margin-left:22px}
+  .add-row svg{width:15px;height:15px}
+  .add-top{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;padding:11px;border:1.5px dashed var(--line);border-radius:var(--radius);
+    background:transparent;color:var(--muted);font-size:14px;font-weight:600;
+    cursor:pointer;margin-bottom:18px;transition:.15s;
+  }
+  .add-top:hover{border-color:var(--green);color:var(--green-deep);background:var(--green-soft)}
+
+  /* empty */
+  .empty{text-align:center;padding:48px 24px;color:var(--muted)}
+  .empty svg{width:48px;height:48px;opacity:.4;margin-bottom:12px}
+  .empty h3{margin:0 0 6px;font-size:15px;color:var(--ink)}
+  .empty p{margin:0;font-size:13px}
+
+  /* highlight on search match */
+  .item.match{background:var(--accent-soft)}
+  .item.match:hover{background:var(--accent-soft)}
+
+  /* fab */
+  .fab{
+    position:fixed;right:18px;bottom:24px;z-index:40;
+    height:52px;padding:0 22px;border-radius:99px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--green) 0%,var(--green-deep) 100%);
+    color:#fff;font-size:14px;font-weight:700;letter-spacing:.5px;
+    box-shadow:0 6px 20px rgba(47,74,47,.4),0 2px 6px rgba(47,74,47,.3);
+    display:flex;align-items:center;gap:8px;transition:.2s;
+  }
+  .fab:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(47,74,47,.45)}
+  .fab:active{transform:translateY(0)}
+  .fab svg{width:18px;height:18px}
+
+  /* modal */
+  .mask{
+    position:fixed;inset:0;z-index:50;background:rgba(20,24,28,.5);
+    backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;
+  }
+  .mask.show{display:flex;animation:fade .15s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .sheet{
+    width:100%;max-width:880px;background:var(--surface);
+    border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 32px rgba(0,0,0,.18);animation:up .25s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .sheet-title{font-size:16px;font-weight:700;margin:0 0 4px}
+  .sheet-sub{font-size:12px;color:var(--muted);margin:0 0 14px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .field input,.field select,.field textarea{
+    width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+    font-size:14px;font-family:inherit;outline:none;background:#fff;color:var(--ink);transition:.15s;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .field textarea{resize:vertical;min-height:60px}
+  .sheet-actions{display:flex;gap:10px;margin-top:6px}
+  .btn{
+    flex:1;padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:700;
+    cursor:pointer;transition:.15s;font-family:inherit;
+  }
+  .btn-primary{background:var(--green);color:#fff}
+  .btn-primary:hover{background:var(--green-deep)}
+  .btn-ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{background:var(--green-soft)}
+  .btn-danger{background:#fdecea;color:var(--danger);border:1px solid #f3c9c3}
+  .btn-danger:hover{background:var(--danger);color:#fff}
+
+  /* confirm */
+  .confirm-body{font-size:14px;color:var(--ink);line-height:1.6}
+
+  /* toast */
+  .toast{
+    position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);
+    background:rgba(34,39,46,.92);color:#fff;padding:10px 18px;border-radius:99px;
+    font-size:13px;z-index:60;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;
+    box-shadow:0 6px 20px rgba(0,0,0,.2);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* responsive */
+  @media(max-width:520px){
+    .container,.topbar-inner{padding-left:14px;padding-right:14px}
+    .brand-sub{display:none}
+    .progress-num{font-size:22px}
+    .l1-head{padding:12px 12px}
+    .l1-body{padding:4px 6px 10px}
+    .item{padding:9px 6px}
+    .fab{right:14px;bottom:18px}
+  }
+
+  /* hidden util */
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+
+<!-- ===== Top bar ===== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-row">
+      <div class="brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l8-4 8 4"/><path d="M4 7v10l8 4 8-4V7"/><path d="M4 7l8 4 8-4"/><path d="M12 11v10"/></svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">户外装备清单</div>
+          <div class="brand-sub">PACKSHEET · 出发前核对</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="btnReset" title="恢复默认清单">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        </button>
+        <button class="icon-btn" id="btnClear" title="清空所有勾选">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </button>
+        <button class="icon-btn" id="btnExpand" title="展开/折叠全部">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-top">
+        <div>
+          <div class="progress-num"><span id="doneCount">0</span><small> / <span id="totalCount">0</span></small></div>
+          <div class="progress-label">已打包物品</div>
+        </div>
+        <div style="text-align:right">
+          <div class="progress-num" style="font-size:18px"><span id="percent">0%</span></div>
+          <div class="progress-label">完成度</div>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-meta">
+        <span><span id="catCount">0</span> 个一级分类</span>
+        <span id="hintText">点击勾选已带物品</span>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input class="search-input" id="searchInput" placeholder="搜索装备名称..." autocomplete="off">
+    </div>
+  </div>
+</header>
+
+<!-- ===== List ===== -->
+<main class="container">
+  <div id="listRoot"></div>
+  <button class="add-top" id="btnAddL1Top">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    添加一级分类
+  </button>
+</main>
+
+<button class="fab" id="fabAdd">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+  添加装备
+</button>
+
+<!-- ===== Modal: add item ===== -->
+<div class="mask" id="maskAdd">
+  <div class="sheet">
+    <h3 class="sheet-title">添加装备物品</h3>
+    <p class="sheet-sub" id="addSub">选择归属分类，然后输入物品名称</p>
+    <div class="field">
+      <label>一级分类</label>
+      <select id="addL1"></select>
+    </div>
+    <div class="field">
+      <label>二级分类</label>
+      <select id="addL2"><option value="">— 选择一级分类后出现 —</option></select>
+    </div>
+    <div class="field">
+      <label>物品名称（三级）</label>
+      <input id="addName" type="text" placeholder="例如：登山杖主体" maxlength="40">
+    </div>
+    <div class="field">
+      <label>备注（可选）</label>
+      <input id="addNote" type="text" placeholder="数量、规格等" maxlength="40">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="addCancel">取消</button>
+      <button class="btn btn-primary" id="addConfirm">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: add L1 ===== -->
+<div class="mask" id="maskL1">
+  <div class="sheet">
+    <h3 class="sheet-title">添加一级分类</h3>
+    <p class="sheet-sub">例如：睡眠系统、厨房装备、服装系统</p>
+    <div class="field">
+      <label>分类名称</label>
+      <input id="l1Name" type="text" placeholder="输入一级分类名称" maxlength="20">
+    </div>
+    <div class="field">
+      <label>图标（可选，输入 emoji）</label>
+      <input id="l1Icon" type="text" placeholder="⛺ 🔥 🧥 🥾" maxlength="4">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="l1Cancel">取消</button>
+      <button class="btn btn-primary" id="l1Confirm">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: add L2 ===== -->
+<div class="mask" id="maskL2">
+  <div class="sheet">
+    <h3 class="sheet-title">添加二级分类</h3>
+    <p class="sheet-sub" id="l2Sub">在选中的一级分类下新增子分类</p>
+    <div class="field">
+      <label>二级分类名称</label>
+      <input id="l2Name" type="text" placeholder="例如：帐篷、睡袋、炊具" maxlength="20">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="l2Cancel">取消</button>
+      <button class="btn btn-primary" id="l2Confirm">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: confirm ===== -->
+<div class="mask" id="maskConfirm">
+  <div class="sheet">
+    <h3 class="sheet-title" id="confirmTitle">确认操作</h3>
+    <div class="confirm-body" id="confirmBody" style="margin-bottom:16px"></div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="confirmCancel">取消</button>
+      <button class="btn btn-danger" id="confirmOk">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   户外装备清单 · Packsheet
+   - 三级层级：一级分类 > 二级分类 > 物品（三级）
+   - 勾选已带/未带，localStorage 持久化
+   ============================================================ */
+
+const STORAGE_KEY = 'packsheet_v1_data';
+const STATE_KEY   = 'packsheet_v1_state';
+
+/* ---------- 默认装备模板（参考两步路 / 户外常用清单） ---------- */
+function defaultData(){
+  return [
+    { id:uid(), icon:'⛺', name:'睡眠系统', collapsed:false, children:[
+      { id:uid(), name:'帐篷', collapsed:false, items:[
+        { id:uid(), name:'帐篷主体', note:'双人双层', checked:false },
+        { id:uid(), name:'地钉', note:'8-10根', checked:false },
+        { id:uid(), name:'防风绳', note:'4根', checked:false },
+        { id:uid(), name:'帐篷袋', note:'', checked:false }
+      ]},
+      { id:uid(), name:'睡袋', collapsed:false, items:[
+        { id:uid(), name:'睡袋（温标适配）', note:'舒适温标-5℃', checked:false },
+        { id:uid(), name:'压缩袋', note:'', checked:false },
+        { id:uid(), name:'睡袋内胆', note:'可选', checked:false }
+      ]},
+      { id:uid(), name:'防潮垫', collapsed:false, items:[
+        { id:uid(), name:'充气垫', note:'R值4+', checked:false },
+        { id:uid(), name:'修补贴片', note:'', checked:false }
+      ]}
+    ]},
+    { id:uid(), icon:'🍳', name:'厨房装备', collapsed:false, children:[
+      { id:uid(), name:'炉具燃料', collapsed:false, items:[
+        { id:uid(), name:'气炉', note:'', checked:false },
+        { id:uid(), name:'气罐', note:'2罐', checked:false },
+        { id:uid(), name:'打火机/火柴', note:'防风', checked:false }
+      ]},
+      { id:uid(), name:'炊具餐具', collapsed:false, items:[
+        { id:uid(), name:'套锅', note:'', checked:false },
+        { id:uid(), name:'折叠勺筷', note:'', checked:false },
+        { id:uid(), name:'水杯/碗', note:'', checked:false },
+        { id:uid(), name:'折叠水桶', note:'', checked:false }
+      ]},
+      { id:uid(), name:'食物饮水', collapsed:false, items:[
+        { id:uid(), name:'饮用水', note:'每人3L/天', checked:false },
+        { id:uid(), name:'路餐', note:'能量棒/坚果', checked:false },
+        { id:uid(), name:'正餐', note:'速食米饭/脱水餐', checked:false }
+      ]}
+    ]},
+    { id:uid(), icon:'🧥', name:'服装系统', collapsed:false, children:[
+      { id:uid(), name:'三层穿衣', collapsed:false, items:[
+        { id:uid(), name:'速干内层', note:'排汗', checked:false },
+        { id:uid(), name:'抓绒/羽绒中层', note:'保暖', checked:false },
+        { id:uid(), name:'硬壳冲锋衣', note:'防风防雨', checked:false },
+        { id:uid(), name:'冲锋裤', note:'', checked:false }
+      ]},
+      { id:uid(), name:'配件', collapsed:false, items:[
+        { id:uid(), name:'速干帽', note:'', checked:false },
+        { id:uid(), name:'魔术头巾', note:'2条', checked:false },
+        { id:uid(), name:'登山袜', note:'美利奴', checked:false },
+        { id:uid(), name:'手套', note:'防风保暖', checked:false },
+        { id:uid(), name:'雨衣', note:'', checked:false }
+      ]}
+    ]},
+    { id:uid(), icon:'🥾', name:'行走装备', collapsed:false, children:[
+      { id:uid(), name:'鞋袜', collapsed:false, items:[
+        { id:uid(), name:'登山鞋', note:'防水透气', checked:false },
+        { id:uid(), name:'营地鞋', note:'可选', checked:false }
+      ]},
+      { id:uid(), name:'辅助装备', collapsed:false, items:[
+        { id:uid(), name:'登山杖', note:'1对', checked:false },
+        { id:uid(), name:'护膝', note:'下山用', checked:false },
+        { id:uid(), name:'头灯', note:'充满电+备用电池', checked:false },
+        { id:uid(), name:'雪套', note:'可选', checked:false }
+      ]}
+    ]},
+    { id:uid(), icon:'🎒', name:'背包收纳', collapsed:false, children:[
+      { id:uid(), name:'背包', collapsed:false, items:[
+        { id:uid(), name:'大背包', note:'55-65L', checked:false },
+        { id:uid(), name:'防雨罩', note:'', checked:false },
+        { id:uid(), name:'冲顶包', note:'可选', checked:false }
+      ]},
+      { id:uid(), name:'收纳', collapsed:false, items:[
+        { id:uid(), name:'防水袋', note:'分类装', checked:false },
+        { id:uid(), name:'垃圾袋', note:'2-3个', checked:false }
+      ]}
+    ]},
+    { id:uid(), icon:'🧰', name:'安全急救', collapsed:false, children:[
+      { id:uid(), name:'急救包', collapsed:false, items:[
+        { id:uid(), name:'创可贴', note:'多种尺寸', checked:false },
+        { id:uid(), name:'绷带/三角巾', note:'', checked:false },
+        { id:uid(), name:'消毒湿巾', note:'', checked:false },
+        { id:uid(), name:'常用药', note:'感冒/止泻/止痛', checked:false },
+        { id:uid(), name:'个人药品', note:'处方药', checked:false }
+      ]},
+      { id:uid(), name:'应急装备', collapsed:false, items:[
+        { id:uid(), name:'求生哨', note:'', checked:false },
+        { id:uid(), name:'保温毯', note:'急救毯', checked:false },
+        { id:uid(), name:'备用电池', note:'', checked:false },
+        { id:uid(), name:'小刀/多功能刀', note:'', checked:false }
+      ]}
+    ]},
+    { id:uid(), icon:'📍', name:'电子导航', collapsed:false, children:[
+      { id:uid(), name:'电子设备', collapsed:false, items:[
+        { id:uid(), name:'手机', note:'充满电', checked:false },
+        { id:uid(), name:'充电宝', note:'20000mAh', checked:false },
+        { id:uid(), name:'充电线', note:'', checked:false },
+        { id:uid(), name:'对讲机', note:'可选', checked:false }
+      ]},
+      { id:uid(), name:'导航记录', collapsed:false, items:[
+        { id:uid(), name:'离线地图', note:'两步路已下载', checked:false },
+        { id:uid(), name:'轨迹备份', note:'', checked:false },
+        { id:uid(), name:'纸质地图', note:'备用', checked:false }
+      ]}
+    ]},
+    { id:uid(), icon:'🪥', name:'个人洗护', collapsed:false, children:[
+      { id:uid(), name:'洗漱用品', collapsed:false, items:[
+        { id:uid(), name:'牙刷牙膏', note:'', checked:false },
+        { id:uid(), name:'毛巾', note:'速干', checked:false },
+        { id:uid(), name:'纸巾', note:'', checked:false },
+        { id:uid(), name:'防晒霜', note:'SPF50', checked:false },
+        { id:uid(), name:'唇膏', note:'', checked:false }
+      ]},
+      { id:uid(), name:'卫生', collapsed:false, items:[
+        { id:uid(), name:'湿厕纸', note:'', checked:false },
+        { id:uid(), name:'洗手液', note:'', checked:false }
+      ]}
+    ]}
+  ];
+}
+
+/* ---------- utils ---------- */
+function uid(){ return 'id'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4); }
+function $(s,el){ return (el||document).querySelector(s); }
+function $all(s,el){ return Array.from((el||document).querySelectorAll(s)); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------- state ---------- */
+let data = loadData();
+let searchTerm = '';
+let confirmCallback = null;
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ return JSON.parse(raw); }
+  }catch(e){}
+  const d = defaultData();
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }catch(e){}
+  return d;
+}
+function saveData(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+/* ---------- stats ---------- */
+function collectItems(){
+  const items=[];
+  data.forEach(l1=>l1.children.forEach(l2=>l2.items.forEach(it=>items.push({it,l1,l2}))));
+  return items;
+}
+function counts(){
+  let total=0,done=0;
+  data.forEach(l1=>{
+    let l1Total=0,l1Done=0;
+    l1.children.forEach(l2=>{
+      l2.items.forEach(it=>{
+        total++;l1Total++;
+        if(it.checked){done++;l1Done++;}
+      });
+    });
+    l1._total=l1Total; l1._done=l1Done;
+  });
+  return {total,done};
+}
+function renderStats(){
+  const {total,done}=counts();
+  $('#doneCount').textContent=done;
+  $('#totalCount').textContent=total;
+  const pct = total? Math.round(done/total*100):0;
+  $('#percent').textContent=pct+'%';
+  $('#progressFill').style.width=pct+'%';
+  $('#catCount').textContent=data.length;
+  const hint = pct===100 ? '🎉 全部打包完成，可以出发了！' :
+               pct>=60 ? '快完成了，再检查一下' :
+               pct>0  ? '继续打包中...' : '点击勾选已带物品';
+  $('#hintText').textContent=hint;
+}
+
+/* ---------- render ---------- */
+function matchText(s){ return !searchTerm || s.toLowerCase().includes(searchTerm.toLowerCase()); }
+
+function render(){
+  const root=$('#listRoot');
+  root.innerHTML='';
+
+  if(data.length===0){
+    root.innerHTML=`<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l8-4 8 4"/><path d="M4 7v10l8 4 8-4V7"/><path d="M4 7l8 4 8-4"/></svg>
+      <h3>清单还是空的</h3>
+      <p>点击下方"添加一级分类"开始创建你的装备清单</p>
+    </div>`;
+    renderStats();
+    return;
+  }
+
+  data.forEach((l1,i)=>{
+    // when searching, hide l1/l2 that have no matches
+    let l1HasMatch = !searchTerm;
+    if(searchTerm){
+      l1HasMatch = matchText(l1.name) || l1.children.some(l2=>
+        matchText(l2.name) || l2.items.some(it=>matchText(it.name)||matchText(it.note))
+      );
+    }
+    if(!l1HasMatch) return;
+
+    const el=document.createElement('div');
+    el.className='l1'+(l1.collapsed?' collapsed':'');
+    el.dataset.id=l1.id;
+
+    const total=l1._total||0, done=l1._done||0;
+    el.innerHTML=`
+      <div class="l1-head" data-act="toggle-l1">
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        <div class="l1-icon">${esc(l1.icon||'📦')}</div>
+        <div class="l1-title">${esc(l1.name)}</div>
+        <span class="mini-badge ${done===total&&total>0?'done':''}">${done}/${total}</span>
+        <div class="head-actions">
+          <button class="mini-btn" data-act="add-l2" title="添加二级分类"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+          <button class="mini-btn" data-act="edit-l1" title="重命名"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+          <button class="mini-btn danger" data-act="del-l1" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </div>
+      <div class="l1-body"></div>
+    `;
+    const body=$('.l1-body',el);
+
+    l1.children.forEach((l2,j)=>{
+      let l2HasMatch = !searchTerm;
+      if(searchTerm){
+        l2HasMatch = matchText(l2.name) || l2.items.some(it=>matchText(it.name)||matchText(it.note));
+      }
+      if(!l2HasMatch) return;
+
+      // expand automatically when searching
+      const collapsed = searchTerm ? false : l2.collapsed;
+
+      const l2el=document.createElement('div');
+      l2el.className='l2'+(collapsed?' collapsed':'');
+      l2el.dataset.id=l2.id;
+      const l2total=l2.items.length, l2done=l2.items.filter(i=>i.checked).length;
+      l2el.innerHTML=`
+        <div class="l2-head" data-act="toggle-l2">
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="l2-dot"></span>
+          <div class="l2-title">${esc(l2.name)}</div>
+          <span class="mini-badge ${l2done===l2total&&l2total>0?'done':''}">${l2done}/${l2total}</span>
+          <div class="head-actions">
+            <button class="mini-btn" data-act="add-item" title="添加物品"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+            <button class="mini-btn" data-act="edit-l2" title="重命名"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+            <button class="mini-btn danger" data-act="del-l2" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        </div>
+        <div class="l2-body"></div>
+      `;
+      const l2body=$('.l2-body',l2el);
+
+      l2.items.forEach(it=>{
+        const isMatch = searchTerm && (matchText(it.name)||matchText(it.note));
+        const itemEl=document.createElement('div');
+        itemEl.className='item'+(it.checked?' checked':'')+(isMatch?' match':'');
+        itemEl.dataset.id=it.id;
+        itemEl.innerHTML=`
+          <div class="checkbox ${it.checked?'checked':''}" data-act="toggle-item"></div>
+          <div class="item-name">${esc(it.name)}</div>
+          ${it.note?`<div class="item-note">${esc(it.note)}</div>`:''}
+          <div class="head-actions">
+            <button class="mini-btn" data-act="edit-item" title="编辑"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+            <button class="mini-btn danger" data-act="del-item" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        `;
+        l2body.appendChild(itemEl);
+      });
+
+      // add item row under l2
+      const addRow=document.createElement('div');
+      addRow.className='add-row';
+      addRow.dataset.act='add-item';
+      addRow.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg> 添加物品`;
+      l2body.appendChild(addRow);
+
+      body.appendChild(l2el);
+    });
+
+    // add l2 row
+    const addL2=document.createElement('div');
+    addL2.className='add-row';
+    addL2.dataset.act='add-l2';
+    addL2.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg> 添加二级分类`;
+    body.appendChild(addL2);
+
+    root.appendChild(el);
+  });
+
+  renderStats();
+}
+
+/* ---------- find helpers ---------- */
+function findL1(id){ return data.find(x=>x.id===id); }
+function findL2(l1id,l2id){ const l1=findL1(l1id); return l1? l1.children.find(x=>x.id===l2id):null; }
+function findItem(l1id,l2id,itid){ const l2=findL2(l1id,l2id); return l2? l2.items.find(x=>x.id===itid):null; }
+
+/* ---------- actions ---------- */
+function toggleItem(l1id,l2id,itid){
+  const it=findItem(l1id,l2id,itid);
+  if(!it) return;
+  it.checked=!it.checked;
+  saveData();
+  render();
+  if(it.checked) toast('已标记为「已带」');
+}
+function toggleL1(id){ const l1=findL1(id); if(l1){l1.collapsed=!l1.collapsed; saveData(); render();} }
+function toggleL2(l1id,l2id){ const l2=findL2(l1id,l2id); if(l2){l2.collapsed=!l2.collapsed; saveData(); render();} }
+
+function deleteL1(id){
+  const l1=findL1(id); if(!l1) return;
+  confirmDialog(`删除一级分类「${l1.name}」？`, `该分类下的所有二级分类和物品将一并删除，此操作不可撤销。`, ()=>{
+    data=data.filter(x=>x.id!==id);
+    saveData(); render(); toast('已删除分类');
+  });
+}
+function deleteL2(l1id,l2id){
+  const l1=findL1(l1id); const l2=findL2(l1id,l2id);
+  if(!l1||!l2) return;
+  confirmDialog(`删除二级分类「${l2.name}」？`, `该分类下 ${l2.items.length} 个物品将一并删除。`, ()=>{
+    l1.children=l1.children.filter(x=>x.id!==l2id);
+    saveData(); render(); toast('已删除分类');
+  });
+}
+function deleteItem(l1id,l2id,itid){
+  const l2=findL2(l1id,l2id); if(!l2) return;
+  const it=l2.items.find(x=>x.id===itid); if(!it) return;
+  confirmDialog(`删除物品「${it.name}」？`, '此操作不可撤销。', ()=>{
+    l2.items=l2.items.filter(x=>x.id!==itid);
+    saveData(); render(); toast('已删除物品');
+  });
+}
+
+/* ---------- inline edit ---------- */
+function startEditL1(id){
+  const l1=findL1(id); if(!l1) return;
+  const el=$(`.l1[data-id="${id}"]`);
+  const titleEl=$('.l1-title',el);
+  const input=document.createElement('input');
+  input.className='l1-title-input'; input.value=l1.name; input.maxLength=20;
+  titleEl.replaceWith(input); input.focus(); input.select();
+  const commit=()=>{ const v=input.value.trim(); if(v) l1.name=v; saveData(); render(); };
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') input.blur(); if(e.key==='Escape') render(); });
+}
+function startEditL2(l1id,l2id){
+  const l2=findL2(l1id,l2id); if(!l2) return;
+  const el=$(`.l2[data-id="${l2id}"]`);
+  const titleEl=$('.l2-title',el);
+  const input=document.createElement('input');
+  input.className='l2-title-input'; input.value=l2.name; input.maxLength=20;
+  titleEl.replaceWith(input); input.focus(); input.select();
+  const commit=()=>{ const v=input.value.trim(); if(v) l2.name=v; saveData(); render(); };
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') input.blur(); if(e.key==='Escape') render(); });
+}
+function startEditItem(l1id,l2id,itid){
+  const it=findItem(l1id,l2id,itid); if(!it) return;
+  const el=$(`.item[data-id="${itid}"]`);
+  const nameEl=$('.item-name',el);
+  const input=document.createElement('input');
+  input.className='item-name-input'; input.value=it.name; input.maxLength=40;
+  nameEl.replaceWith(input); input.focus(); input.select();
+  const commit=()=>{ const v=input.value.trim(); if(v) it.name=v; saveData(); render(); };
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') input.blur(); if(e.key==='Escape') render(); });
+}
+
+/* ---------- event delegation ---------- */
+$('#listRoot').addEventListener('click',(e)=>{
+  const itemEl=e.target.closest('.item');
+  const l2El=e.target.closest('.l2');
+  const l1El=e.target.closest('.l1');
+  const actEl=e.target.closest('[data-act]');
+  if(!actEl) {
+    // click on item row (not on a button) toggles check
+    if(itemEl && !e.target.closest('.head-actions')){
+      const l1id=l1El.dataset.id, l2id=l2El.dataset.id, itid=itemEl.dataset.id;
+      toggleItem(l1id,l2id,itid);
+    }
+    return;
+  }
+  const act=actEl.dataset.act;
+  const l1id=l1El?.dataset.id;
+  const l2id=l2El?.dataset.id;
+  const itid=itemEl?.dataset.id;
+
+  if(act==='toggle-l1'){ if(l1id) toggleL1(l1id); }
+  else if(act==='toggle-l2'){ if(l1id&&l2id) toggleL2(l1id,l2id); }
+  else if(act==='toggle-item'){ if(l1id&&l2id&&itid) toggleItem(l1id,l2id,itid); }
+  else if(act==='add-l2'){ if(l1id) openAddL2(l1id); }
+  else if(act==='add-item'){ if(l1id&&l2id) openAddItem(l1id,l2id); }
+  else if(act==='edit-l1'){ if(l1id) startEditL1(l1id); }
+  else if(act==='edit-l2'){ if(l1id&&l2id) startEditL2(l1id,l2id); }
+  else if(act==='edit-item'){ if(l1id&&l2id&&itid) startEditItem(l1id,l2id,itid); }
+  else if(act==='del-l1'){ if(l1id) deleteL1(l1id); }
+  else if(act==='del-l2'){ if(l1id&&l2id) deleteL2(l1id,l2id); }
+  else if(act==='del-item'){ if(l1id&&l2id&&itid) deleteItem(l1id,l2id,itid); }
+});
+
+/* ---------- modals ---------- */
+function openMask(id){ $('#'+id).classList.add('show'); }
+function closeMask(id){ $('#'+id).classList.remove('show'); }
+
+// add item modal
+let presetL1=null, presetL2=null;
+function openAddItem(l1id,l2id){
+  presetL1=l1id; presetL2=l2id;
+  refreshL1Select();
+  $('#addL1').value=l1id;
+  refreshL2Select();
+  $('#addL2').value=l2id;
+  $('#addName').value=''; $('#addNote').value='';
+  $('#addSub').textContent='将在「'+findL1(l1id)?.name+' / '+findL2(l1id,l2id)?.name+'」下添加';
+  openMask('maskAdd');
+  setTimeout(()=>$('#addName').focus(),120);
+}
+function refreshL1Select(){
+  const sel=$('#addL1');
+  sel.innerHTML = data.length
+    ? data.map(l=>`<option value="${l.id}">${esc(l.icon||'')} ${esc(l.name)}</option>`).join('')
+    : '<option value="">请先添加一级分类</option>';
+}
+function refreshL2Select(){
+  const l1id=$('#addL1').value;
+  const l1=findL1(l1id);
+  const sel=$('#addL2');
+  if(!l1||!l1.children.length){
+    sel.innerHTML='<option value="">— 该分类下暂无二级分类 —</option>';
+    return;
+  }
+  sel.innerHTML=l1.children.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+}
+$('#addL1').addEventListener('change',refreshL2Select);
+$('#addConfirm').addEventListener('click',()=>{
+  const l1id=$('#addL1').value, l2id=$('#addL2').value;
+  const name=$('#addName').value.trim();
+  const note=$('#addNote').value.trim();
+  if(!l1id){ toast('请先添加一级分类'); return; }
+  if(!l2id){ toast('请选择或先添加二级分类'); return; }
+  if(!name){ toast('请输入物品名称'); $('#addName').focus(); return; }
+  const l2=findL2(l1id,l2id);
+  if(!l2){ toast('分类不存在'); return; }
+  l2.items.push({ id:uid(), name, note, checked:false });
+  saveData(); render(); closeMask('maskAdd'); toast('已添加「'+name+'」');
+});
+$('#addCancel').addEventListener('click',()=>closeMask('maskAdd'));
+$('#maskAdd').addEventListener('click',e=>{ if(e.target.id==='maskAdd') closeMask('maskAdd'); });
+
+// add L1 modal
+function openAddL1(){
+  $('#l1Name').value=''; $('#l1Icon').value='';
+  openMask('maskL1');
+  setTimeout(()=>$('#l1Name').focus(),120);
+}
+$('#l1Confirm').addEventListener('click',()=>{
+  const name=$('#l1Name').value.trim();
+  const icon=$('#l1Icon').value.trim()||'📦';
+  if(!name){ toast('请输入分类名称'); $('#l1Name').focus(); return; }
+  data.push({ id:uid(), icon, name, collapsed:false, children:[] });
+  saveData(); render(); closeMask('maskL1'); toast('已添加分类「'+name+'」');
+});
+$('#l1Cancel').addEventListener('click',()=>closeMask('maskL1'));
+$('#maskL1').addEventListener('click',e=>{ if(e.target.id==='maskL1') closeMask('maskL1'); });
+
+// add L2 modal
+let l2ParentL1=null;
+function openAddL2(l1id){
+  l2ParentL1=l1id;
+  const l1=findL1(l1id);
+  $('#l2Sub').textContent='将在一级分类「'+(l1?.name||'')+'」下新增';
+  $('#l2Name').value='';
+  openMask('maskL2');
+  setTimeout(()=>$('#l2Name').focus(),120);
+}
+$('#l2Confirm').addEventListener('click',()=>{
+  const name=$('#l2Name').value.trim();
+  if(!name){ toast('请输入二级分类名称'); $('#l2Name').focus(); return; }
+  const l1=findL1(l2ParentL1);
+  if(!l1){ toast('一级分类不存在'); return; }
+  l1.children.push({ id:uid(), name, collapsed:false, items:[] });
+  saveData(); render(); closeMask('maskL2'); toast('已添加「'+name+'」');
+});
+$('#l2Cancel').addEventListener('click',()=>closeMask('maskL2'));
+$('#maskL2').addEventListener('click',e=>{ if(e.target.id==='maskL2') closeMask('maskL2'); });
+
+// confirm dialog
+function confirmDialog(title,body,cb){
+  $('#confirmTitle').textContent=title;
+  $('#confirmBody').innerHTML=esc(body);
+  confirmCallback=cb;
+  $('#confirmOk').textContent='确认删除';
+  openMask('maskConfirm');
+}
+$('#confirmOk').addEventListener('click',()=>{
+  closeMask('maskConfirm');
+  if(confirmCallback){ confirmCallback(); confirmCallback=null; }
+});
+$('#confirmCancel').addEventListener('click',()=>{ closeMask('maskConfirm'); confirmCallback=null; });
+$('#maskConfirm').addEventListener('click',e=>{ if(e.target.id==='maskConfirm'){ closeMask('maskConfirm'); confirmCallback=null; } });
+
+// top buttons
+$('#btnAddL1Top').addEventListener('click',openAddL1);
+$('#fabAdd').addEventListener('click',()=>{
+  // if no L1, prompt to add L1 first
+  if(data.length===0){ openAddL1(); return; }
+  // open add-item modal, default to first L1 / first L2
+  const l1=data[0];
+  const l2=l1.children[0];
+  if(!l2){ openAddL2(l1.id); return; }
+  openAddItem(l1.id,l2.id);
+});
+
+$('#btnExpand').addEventListener('click',()=>{
+  let anyCollapsed=false;
+  data.forEach(l1=>{ if(l1.collapsed) anyCollapsed=true; l1.collapsed=false; l1.children.forEach(l2=>l2.collapsed=false); });
+  // if all expanded -> collapse all (except keep L1 expanded for usability)
+  if(!anyCollapsed){
+    data.forEach(l1=>{ l1.children.forEach(l2=>l2.collapsed=true); });
+    toast('已折叠全部二级分类');
+  } else {
+    toast('已展开全部');
+  }
+  saveData(); render();
+});
+
+$('#btnClear').addEventListener('click',()=>{
+  const {done}=counts();
+  if(done===0){ toast('当前没有已勾选的物品'); return; }
+  confirmDialog('清空所有勾选？', `将取消 ${done} 个已带物品的勾选状态，物品本身保留。`, ()=>{
+    data.forEach(l1=>l1.children.forEach(l2=>l2.items.forEach(it=>it.checked=false)));
+    saveData(); render(); toast('已清空所有勾选');
+  });
+});
+
+$('#btnReset').addEventListener('click',()=>{
+  confirmDialog('恢复默认清单？', '当前所有自定义内容和勾选状态将被覆盖，恢复为内置的示例装备清单。', ()=>{
+    data=defaultData();
+    saveData(); render(); toast('已恢复默认清单');
+  });
+});
+
+// search
+$('#searchInput').addEventListener('input',(e)=>{
+  searchTerm=e.target.value.trim();
+  render();
+});
+
+// enter key on modals
+['addName','addNote'].forEach(id=>$('#'+id).addEventListener('keydown',e=>{ if(e.key==='Enter') $('#addConfirm').click(); }));
+['l1Name','l1Icon'].forEach(id=>$('#'+id).addEventListener('keydown',e=>{ if(e.key==='Enter') $('#l1Confirm').click(); }));
+$('#l2Name').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#l2Confirm').click(); });
+
+// toast
+let toastTimer=null;
+function toast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// esc to close masks
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    ['maskAdd','maskL1','maskL2','maskConfirm'].forEach(closeMask);
+  }
+});
+
+// init
+render();
+</script>
+</body>
 </html>
